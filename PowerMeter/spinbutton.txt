@@ -1,0 +1,134 @@
+﻿<div role="application">
+<label id="sb1_label" class="sbLabel" for="sb1">Choose a number between 0 and 100</label>
+<div class="spinControl">
+  <div id="sb1" class="spinbutton" role="spinbutton"
+            aria-labelledby="sb1_label"
+            aria-valuemin="0" 
+            aria-valuemax="100" 
+            aria-valuenow="50"
+            tabindex="0">
+            50
+  </div>
+  <div id="sb1_up" class="button" role="button" title="Increase Value">
+    <img src="http://www.oaa-accessibility.org/media/examples/images/button-arrow-up.png" role="presentation">
+  </div>
+  <div id="sb1_down" class="button" role="button" title="Decrease Value">
+    <img src="http://www.oaa-accessibility.org/media/examples/images/button-arrow-down.png" role="presentation">
+  </div>
+</div>
+
+<label id="sb2_label" class="sbLabel" for="sb2">Choose a number between 500 and 1000</label>
+<div class="spinControl">
+  <div id="sb2" class="spinbutton" role="spinbutton"
+            aria-labelledby="sb2_label"
+            aria-valuemin="500" 
+            aria-valuemax="1000" 
+            aria-valuenow="750"
+            tabindex="0">
+            750
+  </div>
+  <div id="sb2_up" class="button" role="button" title="Increase Value">
+    <img src="http://www.oaa-accessibility.org/media/examples/images/button-arrow-up.png" role="presentation">  
+  </div>
+  <div id="sb2_down" class="button" role="button" title="Decrease Value">
+    <img src="http://www.oaa-accessibility.org/media/examples/images/button-arrow-down.png" role="presentation">  
+  </div>
+</div>
+
+</div>
+CSS Code
+
+
+div.spinControl {
+  margin: 20px;
+  margin-left: 40px;
+  width: 100px;
+  height: 44px;
+  border: 1px solid black;
+}
+div.spinbutton {
+  float: left;
+  display: inline;
+  margin: 1px;
+  text-align: right;
+  font-weight: bold;
+  font-size: 1.6em;
+  padding: 7px 10px 7px 0;
+  width: 65px;
+  height: 28px;
+  background-color: #faf7f0;
+}
+div.spinbutton:active,
+div.spinbutton:hover,
+div.spinbutton.focus {
+  margin: 0;
+  background-color: #faf7f0;
+  border: 1px solid red;
+}
+div.button {
+  margin: 0;
+  margin-left: 77px;
+  padding: 0;
+  height: 22px;
+}
+div.button img {
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid black;
+}
+label.sbLabel {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+
+Javascript Source Code
+
+
+$(document).ready(function () {
+  var spin1 = new spinbutton('sb1', 'sb1_up', 'sb1_down', 10);  
+  var spin2 = new spinbutton('sb2', 'sb2_up', 'sb2_down', 50);  
+}); // end ready
+
+//
+// Function spinbutton() is a constructor for an ARIA spinbutton widget. The widget
+// binds to an element with role='spinbutton'.
+//
+// @param (id string) id is the html id of the spinbutton element
+//
+// @param (upID string) upID is the html id of the spinbutton control's increase value button
+//
+// @param (downID string) downID is the html id of the spinbutton control's decrease value button
+//
+// @param (skipVal integer) skipVal is the amount to change the control by for pgUp/pgDown
+// @return N/A
+//
+function spinbutton(id, upID, downID, skipVal) {
+
+  // define widget attributes
+  this.$id = $('#' + id);
+
+  this.upID = upID;
+  this.$upButton = $('#' + upID);
+  this.downID = downID;
+  this.$downButton = $('#' + downID);
+  this.skipVal = skipVal;
+
+  this.valMin = parseInt(this.$id.attr('aria-valuemin'));
+  this.valMax = parseInt(this.$id.attr('aria-valuemax'));
+  this.valNow = parseInt(this.$id.attr('aria-valuenow'));
+
+  this.keys = {
+    pageup:   33,
+    pagedown: 34,
+    end:      35,
+    home:     36,
+    left:     37,
+    up:       38,
+    right:    39,
+    down:     40 
+  };
+    
+  // bind event handlers
+  this.bindHandlers();
+}

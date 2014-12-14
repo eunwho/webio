@@ -245,7 +245,8 @@ def setup():
     global ptScale
     global ptSecond
     global Ct
-    
+    global noSerialDevice
+ 
     webiopi.debug("Script with macros - Setup")
 
     # Setup GPIOs
@@ -257,16 +258,13 @@ def setup():
     #lcd1 = HD47780(driver=driver1)
     #lcd1.lcd_string('Eun Who P.E.',line=0)
 
-    ptPrimary,ptScale,ptSecond,Ct = readPowerMeterFactor()
-    if ptPrimary == 0:
+    try:
         ptPrimary,ptScale,ptSecond,Ct = readPowerMeterFactor()
-        if ptPrimary == 0:
-            ptPrimary,ptScale,ptSecond,Ct = readPowerMeterFactor()
-            if ptPrimary == 0:
-                ptPrimary = 380
-                ptScale= 1
-                ptSecond = 380
-                Ct = 20                
+        noSerialDevice=0
+    except Exception:
+        webiopi.debug("Error readPower")
+        noSerialDevice=1    
+        pass
 
 # Looped by WebIOPi
 def loop():
@@ -280,7 +278,7 @@ def loop():
         lcd1.lcd_string("U press UP", line = 1 )
 
     os.system('print "testing"')
-    webiopi.sleep(5)
+    webiopi.sleep(10)
 
 
 # Called by WebIOPi at server shutdown
@@ -437,7 +435,8 @@ def CoilCtrl(out):
     global ptScale
     global ptSecond
     global Ct
-
+    #global noSerialDevice
+ 
     testing=[0x00]
     testing += ser.read(ser.inWaiting())
 
@@ -491,8 +490,7 @@ def CoilCtrl(out):
     WF = IF * VF * 10000 
 
     if a < 38 :
-        b = 'NO'
-
+        b = din
     else:
         b  = 'I_r='+str(round((testing[4]*256 + testing[5]) * IF,3 ))+':'
         b += 'I_s='+str(round((testing[6]*256 + testing[7]) * IF,3 ))+':'

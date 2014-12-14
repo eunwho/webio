@@ -1,0 +1,172 @@
+<html>
+  <head>
+    <title>Smoothie Chart Example</title>
+    <link rel="stylesheet" href="./css/scope.css" type="text/css" /media="screen"/>
+
+	<script src="./js/jquery.js"></script>
+	<script type="text/javascript" src="./js/smoothie.js"></script>
+	<script type="text/javascript" src="./js/rectangle_sw.js"></script>
+	<script type="text/javascript" src="/webiopi.js"></script>
+	<script type="text/javascript" src="./js/power_meter.js"></script>
+  </head>
+ 
+  <body>
+
+<div class="oscilloScope">
+
+	<div href="" class="cube-switch">
+		<span class="switch">
+	    	<span class="switch-state off">Off</span>
+	        <span class="switch-state on">On</span>
+	    </span>
+	</div>
+
+	<div class="headLine1">POWER STATION MONITOR</div>
+	
+	<div class="console">
+		<div class="power">  
+			<canvas id="powerConsole" width="700" height="200" style="border:solid 1px #000000"> </canvas> 
+		</div>
+	
+		<div class="volt">  
+			<canvas id="voltConsole" width="700" height="150" style="border:solid 1px #000000"> </canvas> 
+		</div>
+		<div class="ampere">  
+			<canvas id="ampereConsole" width="700" height="150" style="border:solid 1px #000000"> </canvas> 
+		</div>
+	</div>
+
+
+	<div id="light-bulb" class="off ui-draggable" >
+	    <div id="light-bulb2" style="opacity: 0; "> </div>
+	</div>
+
+	<div class="monitorValContainer">
+	    <ul class="monitorName">
+			<li class="monitorValName1">P_re</li>
+			<li class="monitorValName2">P_im</li>
+			<li class="monitorValName3">Pf</li>
+			<li class="monitorValName4">I-R</li>
+			<li class="monitorValName5">V-R</li>
+			<li class="monitorValName6">Total</li>
+	    </ul>
+	    <ul class="monitorVal">
+			<li class="num_monitor"> <input type="text" readyonly class="data" id="watt"></li>
+			<li class="num_monitor"> <input type="text" readyonly class="data" id="var"></li>
+			<li class="num_monitor"> <input type="text" readyonly class="data" id="pf"></li>
+			<li class="num_monitor"> <input type="text" readyonly class="data" id="i_a"></li>
+			<li class="num_monitor"> <input type="text" readyonly class="data" id="v_a"></li>
+			<li class="num_monitor"> <input type="text" readyonly class="data" id="total"></li>
+	    </ul>
+	    <ul class="monitorUnit">
+			<li class="monitorValUnit1">kW</li>
+			<li class="monitorValUnit2">kW</li>
+			<li class="monitorValUnit3">[pf]</li>
+			<li class="monitorValUnit4">[Aac]</li>
+			<li class="monitorValUnit5">[Vac]</li>
+			<li class="monitorValUnit6">[kWh]</li>
+	    </ul>
+   </div>
+	
+   <div class="dinLamp">
+		<ul class="pilotLED">
+			<li class="DIN1" id="lamp1"></li>
+			<li class="DIN2" id="lamp2"></li>
+			<li class="DIN3" id="lamp3"></li>
+			<li class="DIN4" id="lamp4"></li>
+			<li class="DIN5" id="lamp5"></li>
+			<li class="DIN6" id="lamp6"></li>
+			<li class="DIN7" id="lamp7"></li>
+			<li class="DIN8" id="lamp8"></li>
+		</ul>
+		<ul class="dinLabel">
+			<li class="DIN1_label">DIN-1</li>
+			<li class="DIN2_label">DIN-2</li>
+			<li class="DIN3_label">DIN-3</li>
+			<li class="DIN4_label">DIN-4</li>
+			<li class="DIN5_label">DIN-5</li>
+			<li class="DIN6_label">DIN-6</li>
+			<li class="DIN7_label">DIN-7</li>
+			<li class="DIN8_label">DIN-8</li>
+		</ul>
+	</div>
+	<div class="dout">
+		<input id = "check1" type = "checkbox"  value ="DO1" class="sw10">	
+		<label  for="check1" class="sw11">DO.1</label>	
+
+		<input id = "check2" type = "checkbox"  value ="D02" class="sw20">	
+		<label  for="check2" class="sw21">DO.2</label>	
+
+		<input id = "check3" type = "checkbox"  value ="D03" class="sw30">	
+		<label  for="check3" class="sw31">DO.3</label>	
+
+		<input id = "check4" type = "checkbox"  value ="D04" class="sw40">	
+		<label  for="check4" class="sw41">DO.4</label>	
+
+		<input id = "check5" type = "checkbox"  value ="RELAY2" class="sw50">	
+		<label  for="check5" class="sw51">RELAY2</label>	
+
+		<input id = "check6" type = "checkbox"  value ="RELAY3" class="sw60">	
+		<label  for="check6" class="sw61">RELAY3</label>	
+	</div>
+	
+	<div class="spinContainer">
+	    <div class="maxSpin">
+		<div class="spinControl">
+		    <div id="sb1" class="spinbutton" role="spinbutton"
+	                aria-labelledby="sb1_label"
+			aria-valuemin="30"
+	                aria-valuemax="70"
+	  	  	aria-valuenow="50"
+	                tabindex="0">
+	                50
+		    </div>	 	
+	            <div id="sb1_up" class="button" role="button" title="Increase Value">
+	    	        <img src="./img/button-arrow-up.png" role="presentation">
+	  	    </div>
+	  	    <div id="sb1_down" class="button" role="button" title="Decrease Value">
+	    	        <img src="./img/button-arrow-down.png" role="presentation">
+	  	    </div>
+	        </div>
+	    </div>
+
+	    <div class="minSpin">	
+		<div class="spinControl">
+		    <div id="sb2" class="spinbutton" role="spinbutton"
+	                aria-labelledby="sb2_label"
+	                aria-valuemin="5"
+	                aria-valuemax="30"
+	  	  	aria-valuenow="15"
+	                tabindex="0">
+	                15
+		    </div>
+	 	
+	            <div id="sb2_up" class="button" role="button" title="Increase Value">
+	    	        <img src="./img/button-arrow-up.png" role="presentation">
+	  	    </div>
+	  	    <div id="sb2_down" class="button" role="button" title="Decrease Value">
+	    	        <img src="./img/button-arrow-down.png" role="presentation">
+	  	    </div>
+	        </div>
+	    </div>
+
+	    <div class="limitName">
+		<ul class="minMaxName">
+		    <li class="maxName">MAX</li>
+		    <li class="minName">MIN</li>
+		</ul>
+		<ul class="minmaxUnit">
+		    <li class="Unit">kW</li>
+		    <li class="Unit">kW</li>
+		</ul>
+	    </div>
+	</div>
+	
+    </div>
+<!---
+    <p><a href="tutorial.html">Return to tutorial</a></p>
+ --->
+</div>  
+  
+  </body>
+</html>

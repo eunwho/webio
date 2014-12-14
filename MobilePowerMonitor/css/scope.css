@@ -1,0 +1,566 @@
+body {
+     background: rgb(70, 72, 75);
+	/ * background: url(background.png) repeat-x; */
+	font: 18px/1.5em Helvetica, Arial, sans-serif;
+}
+
+/*--- powr on/off switch --->
+/* SWITCH */
+.cube-switch {
+    border-radius:10px;
+    border:1px solid rgba(0,0,0,0.4);
+    box-shadow: 0 0 8px rgba(0,0,0,0.6), inset 0 100px 50px rgba(255,255,255,0.1);
+    /* Prevents clics on the back */
+    cursor:default;    
+    display: block;
+    height: 100px;
+    width: 100px;
+
+	top: 83%;
+	left:2%;
+	
+	position: absolute;
+    margin: 0px 0px 0px 0px;
+    overflow:hidden;
+    /* Prevents clics on the back */
+    pointer-events:none;
+    white-space: nowrap;
+    background:#333;
+}
+
+/* The switch */
+.cube-switch .switch {
+    border:1px solid rgba(0,0,0,0.6);
+    border-radius:0.7em;
+    box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    inset 0 -7px 0 rgba(0,0,0,0.2),
+    inset 0 50px 10px rgba(0,0,0,0.2),
+    0 1px 0 rgba(255,255,255,0.2);
+    display:block;
+    width: 60px;
+    height: 60px;
+    margin-left:-30px;
+    margin-top:-30px;
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+ 
+    background:#666;
+    transition: all 0.2s ease-out;
+
+    /* Allows click */
+    cursor:pointer;
+    pointer-events:auto;
+}
+
+/* SWITCH Active State */
+.cube-switch.active {
+    background:#222;
+    box-shadow:
+    0 0 5px rgba(0,0,0,0.5),
+    inset 0 50px 50px rgba(55,55,55,0.1);
+}
+
+.cube-switch.active .switch {
+    background:#333;
+    box-shadow:
+    inset 0 6px 0 rgba(255,255,255,0.1),
+    inset 0 7px 0 rgba(0,0,0,0.2),
+    inset 0 -50px 10px rgba(0,0,0,0.1),
+    0 1px 0 rgba(205,205,205,0.1);
+}
+
+.cube-switch.active:after,
+.cube-switch.active:before {
+    background:#333; 
+    box-shadow:
+    0 1px 0 rgba(255,255,255,0.1),
+    inset 1px 2px 1px rgba(0,0,0,0.5),
+    inset 3px 6px 2px rgba(200,200,200,0.1),
+    inset -1px -2px 1px rgba(0,0,0,0.3);
+}
+
+.cube-switch.active .switch:after,
+.cube-switch.active .switch:before {
+    background:#222;
+    border:none;
+    margin-top:0;
+    height:1px;
+}
+
+.cube-switch .switch-state {
+    display: block;
+    position: absolute;
+    left: 40%;
+    color: #FFF;
+
+    font-size: .5em;
+    text-align: center;
+}
+
+/* SWITCH On State */
+.cube-switch .switch-state.on {
+    bottom: 15%;
+}
+
+/* SWITCH Off State */
+.cube-switch .switch-state.off {
+    top: 15%;
+}
+
+#light-bulb2 {
+width: 150px;
+height: 150px;
+background: url(../img/lightbulb.png) no-repeat 0 0;
+}
+
+#light-bulb {
+position: absolute;
+width: 150px;
+height:150px;
+top: 60%;
+left: 10px;
+background: url(../img/lightbulb.png) no-repeat -150px 0;
+/* cursor: move; */
+z-index: 800;
+}
+/*--- end of Power on/off switch ---*/
+
+
+* {	padding: 0; margin: 0; vertical-align: top; }
+
+.headLine1{
+	/* position: relative; */
+	margin-left: 100px;
+	margin-top: 15px;
+	font-family: TimesRoman Arial, serif;
+	font-size:2em;
+	font-weight:bolder;
+	text-shadow: yellow 0.05em 0.05em 0.1em;
+	color: white;
+
+}
+
+.oscilloScope{
+	width: 1000px;
+	height: 760px;
+	position:relative;
+	box-sizing: border-box;
+	margin: 5px 5px 5px 5px;
+	padding: 3px;
+	border: 2px solid #fff;
+	-webkit-border-radius:10px;	
+
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4);
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4) inset;
+	z-index:1;
+}
+
+h1 {
+	margin-top: 15px;
+	font: normal 32px "omnes-pro", Helvetica, Arial, sans-serif;
+}
+
+h2 {
+	margin-top: 15px;
+	font: normal 32px "omnes-pro", Helvetica, Arial, sans-serif;
+}
+
+h3 {
+	margin-left: 30px;
+	font: normal 26px "omnes-pro", Helvetica, Arial, sans-serif;
+	color: #666;
+}
+
+p {
+	margin-top: 10px;
+}
+
+
+button {
+	font-size: 18px;
+	padding: 1px 7px;
+}
+
+input {
+	font-size: 18px;
+}
+
+input[type=checkbox] {
+	margin: 7px;
+}
+
+#header {
+	position: relative;
+	width: 900px;
+	margin: auto;
+}
+
+#header h2 {
+	margin-left: 10px;
+	vertical-align: middle;
+	font-size: 42px;
+	font-weight: bold;
+	text-decoration: none;
+	color: #000;
+}
+
+
+#content {
+	width: 880px;
+	margin: 0 auto;
+	padding: 10px;
+}
+
+#footer {
+	margin-top: 25px;
+	margin-bottom: 10px;
+	text-align: center;
+	font-size: 12px;
+	color: #999;
+}
+
+.demo-container {
+	box-sizing: border-box;
+	width: 850px;
+	height: 200px;
+	padding: 10px 10px 10px 10px;
+	margin: 10px auto 10px auto;
+	border: 1px solid #ddd;
+	background: #fff;
+	background: linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -o-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -ms-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -moz-linear-gradient(#f6f6f6 0, #fff 50px);
+	background: -webkit-linear-gradient(#f6f6f6 0, #fff 50px);
+	box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+	-o-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-ms-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-moz-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.demo-placeholder {
+	width: 100%;
+	height: 100%;
+	font-size: 14px;
+	line-height: 1.2em;
+}
+
+.legend table {
+	border-spacing: 5px;
+}
+
+.console{
+	width: 726px;
+	height: 550px;
+	box-sizing: border-box;
+	margin: 5px 5px 5px 5px;
+	padding: 10px;
+	border: 2px solid #ddd;
+	-webkit-border-radius: 7px;	
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4);
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4) inset;
+	z-index:1;
+}
+
+.power {
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),1px 4px 4px 4px rgba(0,0,0,0.4);
+}
+.volt {
+	margin: 10px 0px 0px 0px;
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),1px 4px 4px 4px rgba(0,0,0,0.4);
+}
+.ampere {
+	margin: 10px 0px 0px 0px;
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),1px 4px 4px 4px rgba(0,0,0,0.4);
+}
+
+
+input[type=checkbox]{
+	display:none;
+}
+
+.sw11{
+	top: 615px;
+	left: 140px;
+	position: absolute;
+
+	text-align: center;
+	font-size:1em;
+	text-shadow: black 0.1em 0.1em 0.2em;
+	color:white;
+
+	width: 80px;
+	height: 135px;
+	background: url(../img/toggleSwitch.png) no-repeat -82px 15px;
+	cursor:hand;
+	z-index:1;
+}
+
+input.sw10:checked ~label.sw11{
+	background: url(../img/toggleSwitch.png) no-repeat 0px 15px;
+}
+.sw21{
+	top:  615px;
+	left: 240px;
+	position: absolute;
+
+	text-align: center;
+	font-size:1em;
+	text-shadow: black 0.1em 0.1em 0.2em;
+	color:white;
+
+	width: 80px;
+	height: 135px;
+	background: url(../img/toggleSwitch.png) no-repeat -82px 15px;
+	cursor:hand;
+	z-index:1;
+}
+
+input.sw20:checked ~label.sw21{
+	background: url(../img/toggleSwitch.png) no-repeat 0px 15px;
+}
+
+.sw31{
+	top:  615px;
+	left: 340px;
+	position: absolute;
+
+	text-align: center;
+	font-size:1em;
+	text-shadow: black 0.1em 0.1em 0.2em;
+	color:white;
+
+	width: 80px;
+	height: 135px;
+	background: url(../img/toggleSwitch.png) no-repeat -82px 15px;
+	cursor:hand;
+	z-index:1;
+}
+
+input.sw30:checked ~label.sw31{
+	background: url(../img/toggleSwitch.png) no-repeat 0px 15px;
+}
+
+.sw41{
+	top:  615px;
+	left: 440px;
+	position: absolute;
+
+	text-align: center;
+	font-size:1em;
+	text-shadow: black 0.1em 0.1em 0.2em;
+	color:white;
+
+	width: 80px;
+	height: 135px;
+	background: url(../img/toggleSwitch.png) no-repeat -82px 15px;
+	cursor:hand;
+	z-index:1;
+}
+
+input.sw40:checked ~label.sw41{
+	background: url(../img/toggleSwitch.png) no-repeat 0px 15px;
+}
+
+.sw51{
+	top:  615px;
+	left: 540px;
+	position: absolute;
+
+	text-align: center;
+	font-size:1em;
+	text-shadow: black 0.1em 0.1em 0.2em;
+	color:white;
+
+	width: 80px;
+	height: 135px;
+	background: url(../img/toggleSwitch.png) no-repeat -82px 15px;
+	cursor:hand;
+	z-index:1;
+}
+
+input.sw50:checked ~label.sw51{
+	background: url(../img/toggleSwitch.png) no-repeat 0px 15px;
+}
+
+.sw61{
+	top:  615px;
+	left: 640px;
+	position: absolute;
+
+	text-align: center;
+	font-size:1em;
+	text-shadow: black 0.1em 0.1em 0.2em;
+	color:white;
+
+	width: 80px;
+	height: 135px;
+	background: url(../img/toggleSwitch.png) no-repeat -82px 15px;
+	cursor:hand;
+	z-index:1;
+}
+
+input.sw60:checked ~label.sw61{
+	background: url(../img/toggleSwitch.png) no-repeat 0px 15px;
+}
+
+.dinLamp {
+	top: 290px;
+	left: 740px;
+	position: absolute;
+	width: 226px;
+	height: 315px;
+	box-sizing: border-box;
+	margin: 5px 5px 5px 5px;
+	padding: 10px;
+	border: 2px solid #ddd;
+	-webkit-border-radius: 7px;	
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4);
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4) inset;
+	z-index:1;
+}
+
+
+ul {
+	list-style:none;
+}
+
+.pilotLED li{
+
+	position: relative;
+	width: 27px;
+	height:27px;
+	background: black;
+	box-sizing: border-box;
+
+	margin: 5px 10px 10px 40px;
+	padding: 3px;
+	
+	border: 2px solid #fff;
+
+	-webkit-border-radius:15px;	
+
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4);
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4) inset;
+	z-index:1;
+
+}
+
+
+
+.dinLabel {
+
+	top: 6px;
+	left: 40px;
+
+	position: absolute;
+	color:white;	
+	z-index:100;
+}
+
+.dinLabel li{
+
+	margin: 12px 20px 16px 60px;
+	position: relative;
+
+	text-align:left;
+	font-size:1.1em;
+	text-shadow: black 0.05em; 
+	color:white;
+	font-weight:bolder;
+	text-shadow: black 0.3em 0.3em 0.5em;	
+}
+
+.monitorValContainer{
+	top:  55px;
+	left: 740px;
+	position: absolute;
+	width: 226px;
+	height: 230px;
+
+	box-sizing: border-box;
+	margin: 5px 5px 5px 5px;
+	padding: 10px;
+	border: 2px solid #ddd;
+
+	-webkit-border-radius: 7px;	
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4);
+	box-shadow: 4px 4px 3px -3px rgba(0,0,0,0.9),0px 4px 8px 1px rgba(0,0,0,0.4) inset;
+	z-index:1;
+}
+
+.monitor_val li{
+
+}
+
+.monitorVal {
+
+	top:  0px;
+	left: 65px;
+
+	position: absolute;
+	z-index:1;
+}
+
+.monitorVal input{
+
+	margin: 5px 5px 2px 5px;
+	position: relative;
+	text-align: right;
+	font-size:1.4em;
+	text-shadow:  0.05em 0.05em 0.1em;
+	font-weight: bolder;
+	color:yellow;
+
+	width: 70px;
+	height: 30px;
+	background: black;
+	box-sizing: border-box;
+	z-index:100;
+}
+
+.monitorName {
+
+	top:  5px;
+	left: 0px;
+
+	position: absolute;
+	z-index:1;
+}
+
+.monitorName li{
+
+	margin: 5px 5px 16px 13px;
+	position: relative;
+	text-align: left;
+	font-size:1.1em;
+	text-shadow: black 0.3em 0.3em 0.5em;
+	font-weight: bolder;
+	color:white;
+	z-index:1;
+}
+
+.monitorUnit {
+
+	top:  5px;
+	left: 150px;
+
+	position: absolute;
+	z-index:1;
+}
+
+.monitorUnit li{
+
+	margin: 5px 5px 16px 6px;
+	position: relative;
+	text-align: left;
+	font-size:1.1em;
+	text-shadow: black 0.3em 0.3em 0.5em;;
+	font-weight: bolder;
+	color:white;
+	z-index:1;
+}
