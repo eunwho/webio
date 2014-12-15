@@ -317,24 +317,30 @@ def setup():
         noSerialDevice=1    
         pass
 
+"""    if (not int(mcp1.digitalRead(11))):
+        lcd1.lcd_string("U press SET", 0 )
+        webiopi.debug(print(mcp1.digitalRead(11))
+    elif not int(mcp1.digitalRead(12)):
+        lcd1.lcd_string("U press right", line = 1 )
+        send_email_2() """
 
+#os.system("sudo halt")
 # Looped by WebIOPi
 def loop():
- 
     pilotLed = not mcp0.digitalRead(7)
     mcp0.digitalWrite(7,pilotLed)
+    
+    driver1 = EW_LCD_23017( )
+    lcd1 = HD47780(driver=driver1, rows=2, width=16)
 
-
-    if (not mcp1.digitalRead(11)):
-        #lcd1.lcd_string("U press SET", line = 1 )
-        os.system("sudo halt")
-    elif (not mcp1.digitalRead(12)):
-        #lcd1.lcd_string("U press UP", line = 1 )
-        send_email_2()
-        
+    if not mcp1.digitalRead(11):
+        lcd1.lcd_string("U press SET", 0 )
+    elif not mcp1.digitalRead(12):
+        lcd1.lcd_string("U press right", line = 1 )
+        send_email_2() 
+    
     webiopi.debug("loop message")
     webiopi.sleep(5)
-
 
 # Called by WebIOPi at server shutdown
 def destroy():
