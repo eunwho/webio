@@ -14,7 +14,50 @@ import serial
 import binascii
 import math
 
+import subprocess
+import socket
+
+
 from webiopi.devices.digital import MCP23017
+
+def get_ip_address_2():
+    '''
+    Source:
+    http://commandline.org.uk/python/how-to-find-out-ip-address-in-python/
+    '''
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(('google.com', 0))
+    ipaddr=s.getsockname()[0]
+
+    return ipaddr
+
+
+def send_email_2():
+    import datetime
+    import smtplib
+    from email.mime.text import MIMEText
+    today = datetime.date.today()
+
+    addr_to = 'eunwho@naver.com'
+    gmail_user     = 'fromeunwho@gmail.com'
+    gmail_password = 'ii11ii11'
+    smtpserver     = smtplib.SMTP('smtp.gmail.com',587)
+    smtpserver.ehlo()
+    smtpserver.starttls()
+    smtpserver.ehlo
+    smtpserver.login(gmail_user,gmail_password)
+
+    ipaddr = get_ip_address_2()
+
+    my_ip = 'Your ip is %s' %  ipaddr
+    msg = MIMEText(my_ip)
+    msg['Subject'] = 'IP For RaspberryPi on %s' % today.strftime('%b %d %Y')
+    msg['From'] = gmail_user
+    msg['To'] = addr_to
+    smtpserver.sendmail(gmail_user, [addr_to], msg.as_string())
+    smtpserver.quit()
+
 
 GPIO = webiopi.GPIO
 
@@ -66,10 +109,13 @@ ptScale   = 1
 ptSecond  =380
 Ct        = 4
 
+
+E_DELAY = 0.0005
+E_PULSE = 0.0001
+
 class EW_LCD_23017(object):
-    # Timing constants
-    E_DELAY = 0.0005
-    E_PULSE = 0.0001
+    #E_DELAY = 0.0005
+    #E_PULSE = 0.0001
 
     def __init__(self):
         mcp1.digitalWrite(9,0)  # RW
@@ -128,14 +174,17 @@ class EW_LCD_23017(object):
         mcp1.digitalWrite(9,0)
         time.sleep(E_DELAY)  
 
-            
+
 class HD47780(object):
     LCD_CHR = 1
     LCD_CMD = 0
     # Base addresses for lines on a 20x4 display
     LCD_BASE = 0x80, 0xC0, 0x94, 0xD4
+    #LCD_BASE = 0x00, 0x40, 0x20, 0x54
 
-    def __init__(self, driver):
+    def __init__(self, driver, rows=2, width=16):
+        self.rows = rows
+        self.width = width
         self.driver = driver
         self.lcd_init()
 
@@ -143,13 +192,15 @@ class HD47780(object):
         # Initialise display
         lcd_byte = self.driver.lcd_byte
         for i in 0x33, 0x32, 0x28, 0x0C, 0x06, 0x01:
+        #for i in 0x01, 0x06, 0x80, 0x01:
             lcd_byte( i,self.LCD_CMD)
 
     def lcd_string(self, message, line):
         # Send string to display
         lcd_byte = self.driver.lcd_byte
         lcd_byte(self.LCD_BASE[line], self.LCD_CMD)
-        for i in bytearray(message.ljust(self.width)):
+        #for i in bytearray(message.ljust(self.width)):
+        for i in bytearray(message.encode()):
             lcd_byte(i,self.LCD_CHR)
 
 
@@ -254,31 +305,35 @@ def setup():
     GPIO.setFunction(0, GPIO.OUT)
     GPIO.output(17, GPIO.HIGH)
     
-    driver1 = EW_LCD_23017()
-    #lcd1 = HD47780(driver=driver1)
-    #lcd1.lcd_string('Eun Who P.E.',line=0)
+    driver1 = EW_LCD_23017( )
+    lcd1 = HD47780(driver=driver1, rows=2, width=16)
+    lcd1.lcd_string('Eun Who P.E.',1)
 
     try:
         ptPrimary,ptScale,ptSecond,Ct = readPowerMeterFactor()
         noSerialDevice=0
-    except Exception:
+    except:
         webiopi.debug("Error readPower")
         noSerialDevice=1    
         pass
 
+
 # Looped by WebIOPi
 def loop():
+ 
     pilotLed = not mcp0.digitalRead(7)
     mcp0.digitalWrite(7,pilotLed)
+
 
     if (not mcp1.digitalRead(11)):
         #lcd1.lcd_string("U press SET", line = 1 )
         os.system("sudo halt")
     elif (not mcp1.digitalRead(12)):
-        lcd1.lcd_string("U press UP", line = 1 )
-
-    os.system('print "testing"')
-    webiopi.sleep(10)
+        #lcd1.lcd_string("U press UP", line = 1 )
+        send_email_2()
+        
+    webiopi.debug("loop message")
+    webiopi.sleep(5)
 
 
 # Called by WebIOPi at server shutdown
