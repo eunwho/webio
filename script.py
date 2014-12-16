@@ -33,13 +33,14 @@ def get_ip_address_2():
     return ipaddr
 
 
-def send_email_2():
+def send_email_2(txMessage):
     import datetime
     import smtplib
     from email.mime.text import MIMEText
     today = datetime.date.today()
 
-    addr_to = 'eunwho@naver.com'
+    #addr_to = 'eunwho@naver.com'
+    addr_to = 'jaejongmoon@gmail.com'
     gmail_user     = 'fromeunwho@gmail.com'
     gmail_password = 'ii11ii11'
     smtpserver     = smtplib.SMTP('smtp.gmail.com',587)
@@ -50,7 +51,9 @@ def send_email_2():
 
     ipaddr = get_ip_address_2()
 
-    my_ip = 'Your ip is %s' %  ipaddr
+    my_ip = 'This is alarm message from Power Station. :'
+    my_ip += 'Your ip is %s' %  ipaddr
+    my_ip += txMessage
     msg = MIMEText(my_ip)
     msg['Subject'] = 'IP For RaspberryPi on %s' % today.strftime('%b %d %Y')
     msg['From'] = gmail_user
@@ -318,9 +321,17 @@ def setup():
         pass
 
 
+startTime = time.time()
+
 #os.system("sudo halt")
 # Looped by WebIOPi
 def loop():
+
+    global startTime
+    endTime = time.time()
+
+    elapsedTime = endTime - startTime
+ 
     pilotLed = not mcp0.digitalRead(7)
     mcp0.digitalWrite(7,pilotLed)
     
@@ -331,10 +342,27 @@ def loop():
         #get_ip_address_2():
         lcd1.lcd_string(get_ip_address_2(), 0 )
     
-    if not mcp0.digitalRead(8):
-        lcd1.lcd_string("DIN 1 ON", 1 )
-        send_email_2() 
-    
+    if elapsedTime > 30 : 
+
+        if not mcp0.digitalRead(8):
+            lcd1.lcd_string(" DIN 1 ON  ", 1 )
+            send_email_2(' ALARM DIN 1 ON ') 
+            startTime = time.time()
+        elif not mcp0.digitalRead(9):
+            lcd1.lcd_string(" DIN 2 ON   ", 1 )
+            send_email_2(' ALARM DIN 2 ON ') 
+            startTime = time.time()
+        elif not mcp0.digitalRead(10):
+            lcd1.lcd_string(" DIN 3 ON  ", 1 )
+            send_email_2(' ALARM DIN 3 ON ') 
+            startTime = time.time()
+        elif not mcp0.digitalRead(11):
+            lcd1.lcd_string(" DIN 4 ON  ", 1 )
+            send_email_2('  ALARM DIN 4 ON ') 
+            startTime = time.time()
+        else:
+            lcd1.lcd_string("DIN ALL OFF", 1 )
+
     webiopi.debug("loop message")
     webiopi.sleep(5)
 
