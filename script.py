@@ -342,23 +342,23 @@ def loop():
         #get_ip_address_2():
         lcd1.lcd_string(get_ip_address_2(), 0 )
     
-    if elapsedTime > 30 : 
+    if elapsedTime > 3 : 
 
         if not mcp0.digitalRead(8):
             lcd1.lcd_string(" DIN 1 ON  ", 1 )
-            send_email_2(' ALARM DIN 1 ON ') 
+            #send_email_2(' ALARM DIN 1 ON ') 
             startTime = time.time()
         elif not mcp0.digitalRead(9):
             lcd1.lcd_string(" DIN 2 ON   ", 1 )
-            send_email_2(' ALARM DIN 2 ON ') 
+            #send_email_2(' ALARM DIN 2 ON ') 
             startTime = time.time()
         elif not mcp0.digitalRead(10):
             lcd1.lcd_string(" DIN 3 ON  ", 1 )
-            send_email_2(' ALARM DIN 3 ON ') 
+            #send_email_2(' ALARM DIN 3 ON ') 
             startTime = time.time()
         elif not mcp0.digitalRead(11):
             lcd1.lcd_string(" DIN 4 ON  ", 1 )
-            send_email_2('  ALARM DIN 4 ON ') 
+            #send_email_2('  ALARM DIN 4 ON ') 
             startTime = time.time()
         else:
             lcd1.lcd_string("DIN ALL OFF", 1 )
