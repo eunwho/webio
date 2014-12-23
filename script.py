@@ -320,6 +320,10 @@ def setup():
         noSerialDevice=1    
         pass
 
+firstOnDIN_1=1  
+firstOnDIN_2=1  
+firstOnDIN_3=1  
+firstOnDIN_4=1  
 
 startTime = time.time()
 
@@ -328,8 +332,14 @@ startTime = time.time()
 def loop():
 
     global startTime
-    endTime = time.time()
+    global firstOn
+    
+    global firstOnDIN_1  
+    global firstOnDIN_2  
+    global firstOnDIN_3  
+    global firstOnDIN_4  
 
+    endTime = time.time()
     elapsedTime = endTime - startTime
  
     pilotLed = not mcp0.digitalRead(7)
@@ -342,26 +352,45 @@ def loop():
         #get_ip_address_2():
         lcd1.lcd_string(get_ip_address_2(), 0 )
     
-    if elapsedTime > 30 : 
-
-        if not mcp0.digitalRead(8):
-            lcd1.lcd_string(" DIN 1 ON  ", 1 )
+    dinCheck =[0,0,0,0] 
+    if not mcp0.digitalRead(8):
+        dinCheck[0] = 1
+        if elapsedTime > 3600 or firstOnDIN_1 == 1 : 
             send_email_2(' ALARM DIN 1 ON ') 
             startTime = time.time()
-        elif not mcp0.digitalRead(9):
-            lcd1.lcd_string(" DIN 2 ON   ", 1 )
+            firstOnDIN_1 = 0
+
+    if not mcp0.digitalRead(9):
+        dinCheck[1] = 1
+        if elapsedTime > 3600 or firstOnDIN_2 == 1 : 
             send_email_2(' ALARM DIN 2 ON ') 
             startTime = time.time()
-        elif not mcp0.digitalRead(10):
+            firstOnDIN_2 = 0
+
+    if not mcp0.digitalRead(10):
+        dinCheck[2] = 1
+        if elapsedTime > 3600 or firstOnDIN_3 == 1 : 
             lcd1.lcd_string(" DIN 3 ON  ", 1 )
             send_email_2(' ALARM DIN 3 ON ') 
             startTime = time.time()
-        elif not mcp0.digitalRead(11):
+            firstOnDIN_3 = 0
+
+    if not mcp0.digitalRead(11):
+        dinCheck[3] = 1
+        if elapsedTime > 3600 or firstOnDIN_4 == 1 : 
             lcd1.lcd_string(" DIN 4 ON  ", 1 )
             send_email_2('  ALARM DIN 4 ON ') 
             startTime = time.time()
+            firstOnDIN_4 =  0 
+    
+    lcdMessage = ' ' 
+    for x in dinCheck :   
+        if x == 0 :
+            lcdMessage += 'OFF '
         else:
-            lcd1.lcd_string("DIN ALL OFF", 1 )
+            lcdMessage += ' ON '         
+ 
+    lcd1.lcd_string(lcdMessage , 1 )
 
     webiopi.debug("loop message")
     webiopi.sleep(5)
