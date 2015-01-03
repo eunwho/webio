@@ -492,10 +492,8 @@ def CoilCtrl(out):
 
     testing += ser.read(ser.inWaiting())
 
-    webiopi.debug('--------------------------' )
     webiopi.debug('Float Received Data')
     webiopi.debug(testing)
-    webiopi.debug('--------------------------' )
 
     if( mcp0.digitalRead(8) ):
         din = '0'
@@ -509,27 +507,29 @@ def CoilCtrl(out):
             din += '1'
 
     a = len(testing)
-    webiopi.debug('----    Number of Rx Data ', a )
+    webiopi.debug('----    Number of Rx Data ')
+    webiopi.debug(a)
 
-    if a < 53 :
+    if a < 50 :
         b = din
     else:
-        b  = 'V_rs='+print("%6.1" %(conv2Float(testing[ 3: 7]))) +':'
-        b += 'V_st='+print("%6.1" %(conv2Float(testing[ 7:11]))) +':'
-        b += 'V_tr='+print("%6.1" %(conv2Float(testing[11:15]))) +':'
+        
+        b  = 'V_rs='+("%.1f" %(conv2Float(testing[ 3: 7]))) +':'
+        b += 'V_st='+("%.1f" %(conv2Float(testing[ 7:11]))) +':'
+        b += 'V_tr='+("%.1f" %(conv2Float(testing[11:15]))) +':'
 
-        b += 'I_r ='+print("%6.1" %(conv2Float(testing[15:19]))) +':'
-        b += 'I_s ='+print("%6.1" %(conv2Float(testing[19:23]))) +':'
-        b += 'I_t ='+print("%6.1" %(conv2Float(testing[23:27]))) +':'
+        b += 'I_r ='+("%.1f" %(conv2Float(testing[15:19]))) +':'
+        b += 'I_s ='+("%.1f" %(conv2Float(testing[19:23]))) +':'
+        b += 'I_t ='+("%.1f" %(conv2Float(testing[23:27]))) +':'
 
-        b += 'P_re='+print("%6.1" %(conv2Float(testing[27:31])/1000)) +':'
-        b += 'Pvar='+print("%6.1" %(conv2Float(testing[31:35])/1000)) +':'
+        b += 'P_re='+("%.1f" %(conv2Float(testing[27:31])/1000)) +':'
+        b += 'Pvar='+("%.1f" %(conv2Float(testing[31:35])/1000)) +':'
 
-        b += 'pf  ='+print("%6.1" %(conv2Float(testing[35:39]))) +':'
-        b += 'Hz  ='+print("%6.1" %(conv2Float(testing[39:41]))) +':'
+        b += 'pf  ='+("%.1f" %(conv2Float(testing[35:39]))) +':'
+        b += 'Hz  ='+("%.1f" %(conv2Float(testing[39:41]))) +':'
 
-        b += 'kWh ='+print("%10.2" %(conv2Float(testing[41:45]))) +':'
-        b += 'kVah='+print("%10.2" %(conv2Float(testing[45:49]))) +':'
+        b += 'kWh ='+("%.1f" %(conv2Float(testing[41:45]))) +':'
+        b += 'kVah='+("%.1f" %(conv2Float(testing[45:49]))) +':'
 
         b += din +':END'
         webiopi.debug('Received Data:' + b)
