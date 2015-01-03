@@ -81,12 +81,12 @@ function callMacro() {
 	if( data.length > 37)
 	{
 	    var splitData = data.split(':');		
-	    temp = splitData[0].split('=');	I_r = temp[1];
-	    temp = splitData[1].split('=');	I_s = temp[1];			
-	    temp = splitData[2].split('=');	I_t = temp[1];
-	    temp = splitData[3].split('=');	V_r = temp[1];
-	    temp = splitData[4].split('=');	V_s = temp[1];
-	    temp = splitData[5].split('=');	V_t = temp[1];
+	    temp = splitData[0].split('=');	V_r = temp[1];
+	    temp = splitData[1].split('=');	V_s = temp[1];			
+	    temp = splitData[2].split('=');	V_t = temp[1];
+	    temp = splitData[3].split('=');	I_r = temp[1];
+	    temp = splitData[4].split('=');	I_s = temp[1];
+	    temp = splitData[5].split('=');	I_t = temp[1];
 	    temp = splitData[6].split('=');	Watt = temp[1];
 	    temp = splitData[7].split('=');	Var = temp[1];
 	    temp = splitData[8].split('=');	Pf = temp[1];

@@ -13,6 +13,7 @@ import time
 import serial
 import binascii
 import math
+import struct
 
 import subprocess
 import socket
@@ -106,11 +107,6 @@ mcp1.setFunction(15,0)
 mcp0.digitalWrite(0,1)
 mcp0.digitalWrite(1,0)
 mcp0.digitalWrite(2,1)
-
-ptPrimary = 380
-ptScale   = 1
-ptSecond  =380
-Ct        = 4
 
 
 E_DELAY = 0.0005
@@ -295,16 +291,20 @@ def hexToStr(hex_value):
 def strToHex(str_value):
     return int(str_value,16)
 
+def conv2Float(a):
+    s = ''
+
+    for n in a:
+        s += str(hex(n)[2:])
+
+    f = struct.unpack('!f',bytes.fromhex(s))[0]
+
+    return f
+
 
 # Called by WebIOPi at script loading
 def setup():
 
-    global ptPrimary
-    global ptScale
-    global ptSecond
-    global Ct
-    global noSerialDevice
- 
     webiopi.debug("Script with macros - Setup")
 
     # Setup GPIOs
@@ -312,13 +312,6 @@ def setup():
     GPIO.setFunction(0, GPIO.OUT)
     GPIO.output(17, GPIO.HIGH)
     
-    try:
-        ptPrimary,ptScale,ptSecond,Ct = readPowerMeterFactor()
-        noSerialDevice=0
-    except:
-        webiopi.debug("Error readPower")
-        noSerialDevice=1    
-        pass
 
 firstOnDIN_1=1  
 firstOnDIN_2=1  
@@ -458,90 +451,6 @@ def Relay3_Off(out):
     mcp0.digitalWrite(2,1)
     return 'OK'
 
-
-# Read Power Meter Data
-@webiopi.macro
-def sendMsg(out):
-    testing=[0]
-    buff = [0x01, 0x04, 0x07, 0xD0, 0x00, 0x14]
-    crc = CalcCrcFast(buff, len(buff))
-    buff = buff + crc
-
-    GPIO.output(17, GPIO.HIGH)  # tx data
-    webiopi.debug(buff)
-
-    size = ser.write(bytes(buff))
-
-    x = 0.0
-    for i in range(0, 1000) :
-        x = math.sin(x) * math.cos(x)
-
-    GPIO.output(17, 0) # for receive data
-
-    data ='good'
-
-    return 'OK'
-
-@webiopi.macro
-def ReadData():
-    webiopi.debug('Get Data from Power Meter!')
-    ser.flushInput();
-    ser.flushOutput();
-    GPIO.output(17, GPIO.HIGH) #GPIO0 to high(RS485)
-
-    # Read Register 2000 ~ 2008
-    buff = [0x01, 0x04, 0x07, 0xD0, 0x00, 0x04]
-    num_to_read = ((buff[len(buff)-2] << 8) | (buff[len(buff)-1]))
-    webiopi.debug('Number of Regs to read:' + str(num_to_read))
-    crc = CalcCrcFast(buff, len(buff))
-    buff = buff + crc
-
-    webiopi.debug(buff)
-    webiopi.debug(bytes(buff))
-    size = ser.write(bytes(buff))
-    webiopi.debug(size)
-
-    x = 0.0;
-    y = 1.0;
-    z = 0.0;
-
-    for i in range(0, 300) :
-        z += math.sin(y) * math.sin(y)
-        y = y - 0.001
-        x = x + 0.001
-
-    GPIO.output(17, GPIO.LOW) #GPIO0 to low(RS485)
-
-    x = 0.0;
-    y = 1.0;
-    z = 0.0;
-
-    for i in range(0, 5000) :
-        z += math.sin(y) * math.sin(y)
-        y = y - 0.001
-        x = x + 0.001
-
-    temp = ser.read(13)
-    webiopi.debug(temp);
-
-    GPIO.output(17, GPIO.HIGH) #GPIO0 to low(RS485)
-
-    return ''
-
-    # GPIO.output(0, GPIO.HIGH) #GPIO0 to high(RS485)
-
-    # Ia = str(temp[3]<<8 | temp[4])
-    # Ib = str(temp[5]<<8 | temp[6])
-    # Ic = str(temp[7]<<8 | temp[8])
-    # Va = str(temp[9]<<8 | temp[10])
-    # Vb = str(temp[11]<<8 | temp[12])
-    # Vc = str(temp[13]<<8 | temp[14])
-    # Watt = str(temp[15]<<8 | temp[16])
-    # Var = str(temp[17]<<8 | temp[18])
-    # PF = str(temp[19]<<8 | temp[20])
-
-    # return Ia+' '+Ib+' '+Ic+' '+Va+' '+Vb+' '+Vc+' '+Watt+' '+Var+' '+PF
-
 @webiopi.macro
 def CoilCtrl(out):
 
@@ -549,7 +458,7 @@ def CoilCtrl(out):
     global ptScale
     global ptSecond
     global Ct
-    #global noSerialDevice
+    global noSerialDevice
  
     testing=[0x00]
     testing += ser.read(ser.inWaiting())
@@ -562,12 +471,12 @@ def CoilCtrl(out):
         x = math.sin(x) * math.cos(x)
 
     testing=[0x00]
-    buff = [0x01, 0x04, 0x07, 0xD0, 0x00, 0x10]
+    buff = [0x01, 0x04, 0x05, 0x1A, 0x00, 0x18]
     crc = CalcCrcFast(buff, len(buff))
     buff = buff + crc
 
     GPIO.output(17, GPIO.HIGH)  # tx data
-    #webiopi.debug(buff)
+    webiopi.debug(buff)
 
     size = ser.write(bytes(buff))
 
@@ -582,6 +491,11 @@ def CoilCtrl(out):
         x = math.sin(x) * math.cos(x)
 
     testing += ser.read(ser.inWaiting())
+
+    webiopi.debug('--------------------------' )
+    webiopi.debug('Float Received Data')
+    webiopi.debug(testing)
+    webiopi.debug('--------------------------' )
 
     if( mcp0.digitalRead(8) ):
         din = '0'
@@ -595,84 +509,29 @@ def CoilCtrl(out):
             din += '1'
 
     a = len(testing)
+    webiopi.debug('----    Number of Rx Data ', a )
 
-    if ptSecond == 0:
-        ptSecond =1
-
-    IF = Ct / 1000
-    VF = ptPrimary * ptScale / ptSecond /10
-    WF = IF * VF * 10000 
-
-    if a < 38 :
+    if a < 53 :
         b = din
     else:
-        b  = 'I_r='+str(round((testing[4]*256 + testing[5]) * IF,3 ))+':'
-        b += 'I_s='+str(round((testing[6]*256 + testing[7]) * IF,3 ))+':'
-        b += 'I_t='+str(round((testing[8]*256 + testing[9]) * IF,3 ))+':'
+        b  = 'V_rs='+print("%6.1" %(conv2Float(testing[ 3: 7]))) +':'
+        b += 'V_st='+print("%6.1" %(conv2Float(testing[ 7:11]))) +':'
+        b += 'V_tr='+print("%6.1" %(conv2Float(testing[11:15]))) +':'
 
-        b += 'V_r='+str(round((testing[10]*256 + testing[11]) * VF,3 ))+':'
-        b += 'V_s='+str(round((testing[12]*256 + testing[13]) * VF,3 ))+':'
-        b += 'V_t='+str(round((testing[14]*256 + testing[15]) * VF,3 ))+':'
+        b += 'I_r ='+print("%6.1" %(conv2Float(testing[15:19]))) +':'
+        b += 'I_s ='+print("%6.1" %(conv2Float(testing[19:23]))) +':'
+        b += 'I_t ='+print("%6.1" %(conv2Float(testing[23:27]))) +':'
 
-        b += 'Pre='+str(round((testing[16]*256 + testing[17]) * WF /1000,3))+':'
-        b += 'Var='+str(round((testing[18]*256 + testing[19]) * WF /1000,3))+':'
+        b += 'P_re='+print("%6.1" %(conv2Float(testing[27:31])/1000)) +':'
+        b += 'Pvar='+print("%6.1" %(conv2Float(testing[31:35])/1000)) +':'
 
-        b += 'Pf ='+str(round((testing[20]*256 + testing[21])/100,2))+':'
-        b += 'Hz ='+str(round((testing[22]*256 + testing[23])/100,2))+':'
+        b += 'pf  ='+print("%6.1" %(conv2Float(testing[35:39]))) +':'
+        b += 'Hz  ='+print("%6.1" %(conv2Float(testing[39:41]))) +':'
 
-        b += 'PWa='+str(round(((testing[24]*256+testing[25])*65536*65536 + (testing[26]*256+testing[27])*65536 + testing[28]*256+testing[29]) * WF / 5000,3))+':'
-        b += 'VWa='+str(round(((testing[30]*256+testing[31])*65536*65536 + (testing[32]*256+testing[33])*65536 + testing[34]*256+testing[35]) * WF / 5000,3))+':'
+        b += 'kWh ='+print("%10.2" %(conv2Float(testing[41:45]))) +':'
+        b += 'kVah='+print("%10.2" %(conv2Float(testing[45:49]))) +':'
+
         b += din +':END'
-
+        webiopi.debug('Received Data:' + b)
+    
     return b
-
-
-def readPowerMeterFactor():
-
-    testing=[0x00]
-    testing += ser.read(ser.inWaiting())
-
-    testing=[0x00]
-    GPIO.output(17, GPIO.HIGH)  # tx data
-
-    x = 0.0
-    for i in range(0, 500) :
-        x = math.sin(x) * math.cos(x)
-
-    testing=[0x00]
-    buff = [0x01, 0x04, 0x07, 0xE7, 0x00, 0x04]
-    crc = CalcCrcFast(buff, len(buff))
-    buff = buff + crc
-
-    GPIO.output(17, GPIO.HIGH)  # tx data
-
-    size = ser.write(bytes(buff))
-
-    x = 0
-
-    for i in range(0, 1000) :
-        x = math.sin(x) * math.cos(x)
-
-    GPIO.output(17, 0) # receive data
-
-    x = 0.0
-    for i in range(0, 10000) :
-        x = math.sin(x) * math.cos(x)
-
-    testing += ser.read(ser.inWaiting())
-
-    alpa = len(testing)
-
-    if alpa == 14 and testing[1]==1 and testing[2]== 4 : 
-        a  = testing[4]  * 256 + testing[5]
-        b  = testing[6]  * 256 + testing[7]
-        c  = testing[8]  * 256 + testing[9]
-        d  = testing[10] * 256 + testing[11]
-    else:
-        a = 0
-        b = 1
-        c = 1
-        d = 1
-
-    return (a, b, c, d)
-
