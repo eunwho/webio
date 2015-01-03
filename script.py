@@ -68,6 +68,10 @@ GPIO = webiopi.GPIO
 mcp0 = MCP23017(slave=0x20)
 mcp1 = MCP23017(slave=0x21)
 
+mcp0.digitalWrite(0,1)
+mcp0.digitalWrite(1,1)
+mcp0.digitalWrite(2,1)
+
 mcp0.setFunction(0, 1)
 mcp0.setFunction(1, 1)
 mcp0.setFunction(2, 1)
@@ -103,11 +107,6 @@ mcp1.setFunction(12,0)
 mcp1.setFunction(13,0)
 mcp1.setFunction(14,0)
 mcp1.setFunction(15,0)
-
-mcp0.digitalWrite(0,1)
-mcp0.digitalWrite(1,0)
-mcp0.digitalWrite(2,1)
-
 
 E_DELAY = 0.0005
 E_PULSE = 0.0001
@@ -293,14 +292,14 @@ def strToHex(str_value):
 
 def conv2Float(a):
     s = ''
-
-    for n in a:
-        s += str(hex(n)[2:])
-
-    f = struct.unpack('!f',bytes.fromhex(s))[0]
+    try:
+        for n in a:
+            s += str(hex(n)[2:])
+        f = struct.unpack('!f',bytes.fromhex(s))[0]
+    except:
+        f = 0.0
 
     return f
-
 
 # Called by WebIOPi at script loading
 def setup():
@@ -513,23 +512,22 @@ def CoilCtrl(out):
     if a < 50 :
         b = din
     else:
-        
-        b  = 'V_rs='+("%.1f" %(conv2Float(testing[ 3: 7]))) +':'
-        b += 'V_st='+("%.1f" %(conv2Float(testing[ 7:11]))) +':'
-        b += 'V_tr='+("%.1f" %(conv2Float(testing[11:15]))) +':'
+        b  = 'V_rs='+("%.1f" %(conv2Float(testing[ 4: 8]))) +':'
+        b += 'V_st='+("%.1f" %(conv2Float(testing[ 8:12]))) +':'
+        b += 'V_tr='+("%.1f" %(conv2Float(testing[12:16]))) +':'
 
-        b += 'I_r ='+("%.1f" %(conv2Float(testing[15:19]))) +':'
-        b += 'I_s ='+("%.1f" %(conv2Float(testing[19:23]))) +':'
-        b += 'I_t ='+("%.1f" %(conv2Float(testing[23:27]))) +':'
+        b += 'I_r ='+("%.1f" %(conv2Float(testing[16:20]))) +':'
+        b += 'I_s ='+("%.1f" %(conv2Float(testing[20:24]))) +':'
+        b += 'I_t ='+("%.1f" %(conv2Float(testing[24:28]))) +':'
 
-        b += 'P_re='+("%.1f" %(conv2Float(testing[27:31])/1000)) +':'
-        b += 'Pvar='+("%.1f" %(conv2Float(testing[31:35])/1000)) +':'
+        b += 'P_re='+("%.1f" %(conv2Float(testing[28:32])/1000)) +':'
+        b += 'Pvar='+("%.1f" %(conv2Float(testing[32:36])/1000)) +':'
 
-        b += 'pf  ='+("%.1f" %(conv2Float(testing[35:39]))) +':'
-        b += 'Hz  ='+("%.1f" %(conv2Float(testing[39:41]))) +':'
+        b += 'pf  ='+("%.1f" %(conv2Float(testing[36:40]))) +':'
+        b += 'Hz  ='+("%.1f" %(conv2Float(testing[40:44]))) +':'
 
-        b += 'kWh ='+("%.1f" %(conv2Float(testing[41:45]))) +':'
-        b += 'kVah='+("%.1f" %(conv2Float(testing[45:49]))) +':'
+        b += 'kWh ='+("%.1f" %(conv2Float(testing[44:48]))) +':'
+        b += 'kVah='+("%.1f" %(conv2Float(testing[48:52]))) +':'
 
         b += din +':END'
         webiopi.debug('Received Data:' + b)

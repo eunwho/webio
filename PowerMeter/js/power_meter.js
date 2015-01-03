@@ -165,7 +165,7 @@ function callMacro() {
 
 
 function realtimeClock() {
-  setTimeout('realtimeClock()', 3000);
+  setTimeout('realtimeClock()', 4000);
 }
 
 
@@ -196,5 +196,5 @@ function readData() {
 		$('#pf').val(buf[8]);	
 	});
 	
-	// read_timer = setTimeout(readData, 1000);
+	// read_timer = setTimeout(readData, 2000);
 }
