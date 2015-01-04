@@ -108,8 +108,13 @@ mcp1.setFunction(13,0)
 mcp1.setFunction(14,0)
 mcp1.setFunction(15,0)
 
-E_DELAY = 0.0005
-E_PULSE = 0.0001
+
+
+def delay_usec():
+    x=0.1 
+    for i in range(0, 50) :
+        x = math.sin(x) * math.cos(x)
+
 
 class EW_LCD_23017(object):
     #E_DELAY = 0.0005
@@ -144,11 +149,14 @@ class EW_LCD_23017(object):
             mcp1.digitalWrite(7,1)
 
         # Toggle Enable Port
-        time.sleep(E_DELAY)  
+        #time.sleep(E_DELAY)
+        delay_usec()  
         mcp1.digitalWrite(9,1)      # CE
-        time.sleep(E_PULSE)  
+        delay_usec()  
+        #time.sleep(E_PULSE)  
         mcp1.digitalWrite(9,0)
-        time.sleep(E_DELAY)  
+        #time.sleep(E_DELAY)  
+        delay_usec()  
         
         # low nibble setting
         mcp1.digitalWrite(4,0)  
@@ -166,11 +174,14 @@ class EW_LCD_23017(object):
             mcp1.digitalWrite(7,1)
 
         # Toggle Enable Port
-        time.sleep(E_DELAY)  
+        #time.sleep(E_DELAY)  
+        delay_usec()  
         mcp1.digitalWrite(9,1)
-        time.sleep(E_PULSE)  
+        #time.sleep(E_PULSE)  
+        delay_usec()  
         mcp1.digitalWrite(9,0)
-        time.sleep(E_DELAY)  
+        #time.sleep(E_DELAY)  
+        delay_usec()  
 
 
 class HD47780(object):
@@ -385,7 +396,7 @@ def loop():
     lcd1.lcd_string(lcdMessage , 1 )
 
     webiopi.debug("loop message")
-    webiopi.sleep(5)
+    webiopi.sleep(10)
 
 # Called by WebIOPi at server shutdown
 def destroy():
@@ -450,33 +461,23 @@ def Relay3_Off(out):
     mcp0.digitalWrite(2,1)
     return 'OK'
 
-@webiopi.macro
-def CoilCtrl(out):
+def rxData( ):
 
-    global ptPrimary
-    global ptScale
-    global ptSecond
-    global Ct
-    global noSerialDevice
- 
-    testing=[0x00]
-    testing += ser.read(ser.inWaiting())
+    rxd=[0x00]
+    rxd += ser.read(ser.inWaiting())
 
-    testing=[0x00]
     GPIO.output(17, GPIO.HIGH)  # tx data
 
     x = 0.0
     for i in range(0, 500) :
         x = math.sin(x) * math.cos(x)
 
-    testing=[0x00]
+    rxd =[0x00]
     buff = [0x01, 0x04, 0x05, 0x1A, 0x00, 0x18]
     crc = CalcCrcFast(buff, len(buff))
     buff = buff + crc
 
     GPIO.output(17, GPIO.HIGH)  # tx data
-    webiopi.debug(buff)
-
     size = ser.write(bytes(buff))
 
     x = 0.0
@@ -489,10 +490,25 @@ def CoilCtrl(out):
     for i in range(0, 10000) :
         x = math.sin(x) * math.cos(x)
 
-    testing += ser.read(ser.inWaiting())
+    rxd += ser.read(ser.inWaiting())
+    return rxd  
 
-    webiopi.debug('Float Received Data')
+
+@webiopi.macro
+def CoilCtrl(out):
+
+    testing=rxData( )
+  
+    if (conv2Float(testing[ 4: 8])) == 0.0:
+        webiopi.sleep(0.3)
+        testing = rxData( ) 
+        if (conv2Float(testing[ 4: 8])) == 0.0:
+            webiopi.sleep(0.3)
+            testing = rxData( ) 
+
+    webiopi.debug('----Rx Data ')
     webiopi.debug(testing)
+
 
     if( mcp0.digitalRead(8) ):
         din = '0'
@@ -506,30 +522,31 @@ def CoilCtrl(out):
             din += '1'
 
     a = len(testing)
-    webiopi.debug('----    Number of Rx Data ')
-    webiopi.debug(a)
+    #webiopi.debug('----    Number of Rx Data ')
+    #webiopi.debug(a)
 
-    if a < 50 :
+    if a < 54 :
         b = din
     else:
         b  = 'V_rs='+("%.1f" %(conv2Float(testing[ 4: 8]))) +':'
         b += 'V_st='+("%.1f" %(conv2Float(testing[ 8:12]))) +':'
         b += 'V_tr='+("%.1f" %(conv2Float(testing[12:16]))) +':'
 
-        b += 'I_r ='+("%.1f" %(conv2Float(testing[16:20]))) +':'
-        b += 'I_s ='+("%.1f" %(conv2Float(testing[20:24]))) +':'
-        b += 'I_t ='+("%.1f" %(conv2Float(testing[24:28]))) +':'
+        b += 'I_r=' +("%.1f" %(conv2Float(testing[16:20]))) +':'
+        b += 'I_s=' +("%.1f" %(conv2Float(testing[20:24]))) +':'
+        b += 'I_t=' +("%.1f" %(conv2Float(testing[24:28]))) +':'
 
         b += 'P_re='+("%.1f" %(conv2Float(testing[28:32])/1000)) +':'
         b += 'Pvar='+("%.1f" %(conv2Float(testing[32:36])/1000)) +':'
 
-        b += 'pf  ='+("%.1f" %(conv2Float(testing[36:40]))) +':'
-        b += 'Hz  ='+("%.1f" %(conv2Float(testing[40:44]))) +':'
+        b += 'pf='  +("%.1f" %(conv2Float(testing[36:40]))) +':'
+        b += 'Hz='  +("%.1f" %(conv2Float(testing[40:44]))) +':'
 
-        b += 'kWh ='+("%.1f" %(conv2Float(testing[44:48]))) +':'
+        b += 'kWh=' +("%.1f" %(conv2Float(testing[44:48]))) +':'
         b += 'kVah='+("%.1f" %(conv2Float(testing[48:52]))) +':'
 
         b += din +':END'
-        webiopi.debug('Received Data:' + b)
+
+        webiopi.debug('------PM Data:' + b)
     
     return b

@@ -165,7 +165,7 @@ function callMacro() {
 
 
 function realtimeClock() {
-  setTimeout('realtimeClock()', 4000);
+  setTimeout('realtimeClock()', 5000);
 }
 
 
