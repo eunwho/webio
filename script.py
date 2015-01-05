@@ -10,6 +10,7 @@
 import os
 import webiopi
 import time
+import datetime
 import serial
 import binascii
 import math
@@ -107,7 +108,6 @@ mcp1.setFunction(12,0)
 mcp1.setFunction(13,0)
 mcp1.setFunction(14,0)
 mcp1.setFunction(15,0)
-
 
 
 def delay_usec():
@@ -305,12 +305,126 @@ def conv2Float(a):
     s = ''
     try:
         for n in a:
-            s += str(hex(n)[2:])
+            if n == 0:
+                b = '00'
+            else:
+                b = str(hex(n))[2:]           
+
+            s += b
+
         f = struct.unpack('!f',bytes.fromhex(s))[0]
     except:
         f = 0.0
 
     return f
+
+def setLogFile():
+
+    global dataFileName
+    global dataFileLineNumber
+    
+    dataFileName = 'Log-'
+    dataFileName += datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
+    dataFileName += ".txt"
+
+    dataFileLineNumber = 0;
+
+    with open(dataFileName,'w') as fout:
+        fout.write("Power Meter Monitoring System Data Log"+'\r'+'\n')
+
+    with open(dataFileName,'a') as fout:
+        fout.write("======================================"+'\r'+'\n')
+
+
+def rxData( ):
+
+    rxd=[0x00]
+    rxd += ser.read(ser.inWaiting())
+
+    GPIO.output(17, GPIO.HIGH)  # tx data
+
+    x = 0.0
+    for i in range(0, 500) :
+        x = math.sin(x) * math.cos(x)
+
+    rxd =[0x00]
+    buff = [0x01, 0x04, 0x05, 0x1A, 0x00, 0x18]
+    crc = CalcCrcFast(buff, len(buff))
+    buff = buff + crc
+
+    GPIO.output(17, GPIO.HIGH)  # tx data
+    size = ser.write(bytes(buff))
+
+    x = 0.0
+    for i in range(0, 1000) :
+        x = math.sin(x) * math.cos(x)
+
+    GPIO.output(17, 0) # receive data
+
+    x = 0.0
+    for i in range(0, 10000) :
+        x = math.sin(x) * math.cos(x)
+
+    rxd += ser.read(ser.inWaiting())
+    return rxd  
+
+
+def PowerMeterProc( ):
+
+    testing=rxData( )
+  
+    if (conv2Float(testing[ 4: 8])) == 0.0:
+       
+        f = open("rxdErrorLog.txt", 'a') 
+
+        for n in testing:
+            f.write(str(n)) 
+            f.write(',')
+
+        f.write('\r \n') 
+        f.close() 
+        if (conv2Float(testing[ 4: 8])) == 0.0:
+            webiopi.sleep(0.3)
+            testing = rxData( ) 
+
+
+    if( mcp0.digitalRead(8) ):
+        din = '0'
+    else:
+        din = '1'
+
+    for i in range(7):
+        if( mcp0.digitalRead(i+9) ):
+            din += '0'
+        else:
+            din += '1'
+
+    a = len(testing)
+
+    if a < 54 :
+        b = din
+    else:
+        b  = 'V_rs='+("%.1f" %(conv2Float(testing[ 4: 8]))) +':'
+        b += 'V_st='+("%.1f" %(conv2Float(testing[ 8:12]))) +':'
+        b += 'V_tr='+("%.1f" %(conv2Float(testing[12:16]))) +':'
+
+        b += 'I_r=' +("%.1f" %(conv2Float(testing[16:20]))) +':'
+        b += 'I_s=' +("%.1f" %(conv2Float(testing[20:24]))) +':'
+        b += 'I_t=' +("%.1f" %(conv2Float(testing[24:28]))) +':'
+
+        b += 'P_re='+("%.1f" %(conv2Float(testing[28:32])/1000)) +':'
+        b += 'Pvar='+("%.1f" %(conv2Float(testing[32:36])/1000)) +':'
+
+        b += 'pf='  +("%.1f" %(conv2Float(testing[36:40]))) +':'
+        b += 'Hz='  +("%.1f" %(conv2Float(testing[40:44]))) +':'
+
+        b += 'kWh=' +("%.1f" %(conv2Float(testing[44:48]))) +':'
+        b += 'kVah='+("%.1f" %(conv2Float(testing[48:52]))) +':'
+
+        b += din +':END'
+
+    return b
+
 
 # Called by WebIOPi at script loading
 def setup():
@@ -321,7 +435,8 @@ def setup():
     GPIO.setFunction(17, GPIO.OUT)
     GPIO.setFunction(0, GPIO.OUT)
     GPIO.output(17, GPIO.HIGH)
-    
+    setLogFile()
+ 
 
 firstOnDIN_1=1  
 firstOnDIN_2=1  
@@ -329,6 +444,7 @@ firstOnDIN_3=1
 firstOnDIN_4=1  
 
 startTime = time.time()
+f_startTime = time.time()
 
 #os.system("sudo halt")
 # Looped by WebIOPi
@@ -336,6 +452,9 @@ def loop():
 
     global startTime
     global firstOn
+    global f_startTime
+    global dataFileLineNumber
+    global dataFileName
     
     global firstOnDIN_1  
     global firstOnDIN_2  
@@ -395,48 +514,46 @@ def loop():
  
     lcd1.lcd_string(lcdMessage , 1 )
 
-    webiopi.debug("loop message")
+
+    f_endTime = time.time()
+    f_elapsedTime = f_endTime - f_startTime
+
+
+    if f_elapsedTime > 60 :
+    #if f_elapsedTime > 20 :
+        f_startTime = time.time() 
+
+        if(dataFileLineNumber > 999):
+        #if(dataFileLineNumber > 19):
+            setLogFile()
+        
+        dataFileLineNumber += 1
+        s= str(dataFileLineNumber)+'\t'
+        
+        try:
+            with open(dataFileName,'a') as f:
+                f.write(s)
+            s = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")+'\t'    
+            with open(dataFileName,'a') as f:
+                f.write(s)
+
+            d = PowerMeterProc()
+            data_log = d +'\r'+'\n'
+            with open(dataFileName,'a') as f:
+                f.write(data_log)
+        except:
+            setLogFile()
+            pass
+
+        webiopi.debug(s)
+
     webiopi.sleep(10)
+
 
 # Called by WebIOPi at server shutdown
 def destroy():
     webiopi.debug("Script with macros - Destroy")
     # Reset GPIO functions
-
-# Read from Serial
-@webiopi.macro
-def ReadSerial():
-    webiopi.debug('ReadSerial')
-    test = ""
-    while ser.inWaiting() > 0 :
-        buf = ser.read(1)
-        webiopi.debug(buf)
-        webiopi.debug(binascii.b2a_hex(buf))
-        test += binascii.b2a_hex(buf).decode('ascii') + ' '
-
-    return test
-
-# Write str to Serial
-@webiopi.macro
-def WriteSerial(str):
-    webiopi.debug('macro!')
-    ser.flushInput()
-    webiopi.debug('Receive:')
-    webiopi.debug(str);
-
-    temp = str.split('%20') #space
-    buf = []
-    for i in temp:
-        buf.append(strToHex(i))
-    crc = CalcCrcFast(buf, len(buf))
-    buf = buf + crc
-
-    GPIO.output(17, GPIO.HIGH) #GPIO0 to high(RS485)
-    for i in buf:
-        ser.write(binascii.a2b_hex(hexToStr(i)))
-    webiopi.debug(buf)
-    GPIO.output(17, GPIO.LOW) #GPIO0 to low(RS485)
-    return 'OK'
 
 # ButtonCtrl
 @webiopi.macro
@@ -461,92 +578,7 @@ def Relay3_Off(out):
     mcp0.digitalWrite(2,1)
     return 'OK'
 
-def rxData( ):
-
-    rxd=[0x00]
-    rxd += ser.read(ser.inWaiting())
-
-    GPIO.output(17, GPIO.HIGH)  # tx data
-
-    x = 0.0
-    for i in range(0, 500) :
-        x = math.sin(x) * math.cos(x)
-
-    rxd =[0x00]
-    buff = [0x01, 0x04, 0x05, 0x1A, 0x00, 0x18]
-    crc = CalcCrcFast(buff, len(buff))
-    buff = buff + crc
-
-    GPIO.output(17, GPIO.HIGH)  # tx data
-    size = ser.write(bytes(buff))
-
-    x = 0.0
-    for i in range(0, 1000) :
-        x = math.sin(x) * math.cos(x)
-
-    GPIO.output(17, 0) # receive data
-
-    x = 0.0
-    for i in range(0, 10000) :
-        x = math.sin(x) * math.cos(x)
-
-    rxd += ser.read(ser.inWaiting())
-    return rxd  
-
-
 @webiopi.macro
-def CoilCtrl(out):
+def CoilCtrl(out):  
+    return PowerMeterProc( )
 
-    testing=rxData( )
-  
-    if (conv2Float(testing[ 4: 8])) == 0.0:
-        webiopi.sleep(0.3)
-        testing = rxData( ) 
-        if (conv2Float(testing[ 4: 8])) == 0.0:
-            webiopi.sleep(0.3)
-            testing = rxData( ) 
-
-    webiopi.debug('----Rx Data ')
-    webiopi.debug(testing)
-
-
-    if( mcp0.digitalRead(8) ):
-        din = '0'
-    else:
-        din = '1'
-
-    for i in range(7):
-        if( mcp0.digitalRead(i+9) ):
-            din += '0'
-        else:
-            din += '1'
-
-    a = len(testing)
-    #webiopi.debug('----    Number of Rx Data ')
-    #webiopi.debug(a)
-
-    if a < 54 :
-        b = din
-    else:
-        b  = 'V_rs='+("%.1f" %(conv2Float(testing[ 4: 8]))) +':'
-        b += 'V_st='+("%.1f" %(conv2Float(testing[ 8:12]))) +':'
-        b += 'V_tr='+("%.1f" %(conv2Float(testing[12:16]))) +':'
-
-        b += 'I_r=' +("%.1f" %(conv2Float(testing[16:20]))) +':'
-        b += 'I_s=' +("%.1f" %(conv2Float(testing[20:24]))) +':'
-        b += 'I_t=' +("%.1f" %(conv2Float(testing[24:28]))) +':'
-
-        b += 'P_re='+("%.1f" %(conv2Float(testing[28:32])/1000)) +':'
-        b += 'Pvar='+("%.1f" %(conv2Float(testing[32:36])/1000)) +':'
-
-        b += 'pf='  +("%.1f" %(conv2Float(testing[36:40]))) +':'
-        b += 'Hz='  +("%.1f" %(conv2Float(testing[40:44]))) +':'
-
-        b += 'kWh=' +("%.1f" %(conv2Float(testing[44:48]))) +':'
-        b += 'kVah='+("%.1f" %(conv2Float(testing[48:52]))) +':'
-
-        b += din +':END'
-
-        webiopi.debug('------PM Data:' + b)
-    
-    return b
