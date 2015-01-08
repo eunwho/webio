@@ -305,13 +305,10 @@ def conv2Float(a):
     s = ''
     try:
         for n in a:
-            if n == 0:
-                b = '00'
-            else:
-                b = str(hex(n))[2:]           
-
+            b = str(hex(n))[2:]           
+            if len(b) == 1:
+                b = '0' + b
             s += b
-
         f = struct.unpack('!f',bytes.fromhex(s))[0]
     except:
         f = 0.0
@@ -323,7 +320,7 @@ def setLogFile():
     global dataFileName
     global dataFileLineNumber
     
-    dataFileName = 'Log-'
+    dataFileName = '/home/pi/LogData/Log-'
     dataFileName += datetime.datetime.now().strftime("%Y-%m-%d-%H-%M")
     dataFileName += ".txt"
 
@@ -362,7 +359,7 @@ def rxData( ):
     GPIO.output(17, 0) # receive data
 
     x = 0.0
-    for i in range(0, 10000) :
+    for i in range(0, 15000) :
         x = math.sin(x) * math.cos(x)
 
     rxd += ser.read(ser.inWaiting())
@@ -373,9 +370,9 @@ def PowerMeterProc( ):
 
     testing=rxData( )
   
-    if (conv2Float(testing[ 4: 8])) == 0.0:
+    if (conv2Float(testing[ 4: 8])) == 0.0 and not (conv2Float(testing[ 8: 12])) == 0.0:
        
-        f = open("rxdErrorLog.txt", 'a') 
+        f = open("/home/pi/LogData/rxdErrorLog.txt", 'a') 
 
         for n in testing:
             f.write(str(n)) 
